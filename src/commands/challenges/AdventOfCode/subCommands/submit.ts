@@ -52,17 +52,21 @@ export default {
 
         if (reply.length >= 1) reply.push(`${reply.pop()} ${checkmark}`);
         if (message) reply.push(`${arrow} ${message.replace(/\.+/, "")}`);
-        if (data) return reply.push(`${eq} A solução executou em: ${chalk.green(data.time)} ms`);
 
         clearTimeout(timeoutId);
+        if (data) {
+          reply.push(`${eq} A solução executou em: ${chalk.green(data.time)} ms`);
+          const content = `Solução enviada ✔\`\`\`ansi\n${reply.join("\n")}\`\`\``;
+          return await interaction.editReply(blockQuote(bold(content)));
+        }
+
         // prettier-ignore
         setImmediate(async function sendReply(elipsisPhase: number, initialTime: number) {
             const elipsis = Gradients.christmas(".".repeat(elipsisPhase % 4).padEnd(3));
             const elapsedTime = process.hrtime()[0] - initialTime;
-            const title = !streamEnded ? "Enviando solução..." : "Solução enviada ✔"; 
-            const content = !streamEnded ? `${reply.join("\n")} ${elipsis} ${elapsedTime}s` : reply.join("\n");
-
-            await interaction.editReply(blockQuote(bold(`${title} \`\`\`ansi\n${content}\`\`\``)));
+            const content = `Enviando solução... \`\`\`ansi\n${reply.join("\n")} ${elipsis} ${elapsedTime}s\`\`\``;
+            
+            await interaction.editReply(blockQuote(bold(content)));
 
             if (!streamEnded) {
               clearTimeout(timeoutId);
